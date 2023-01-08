@@ -1,5 +1,5 @@
 # Analyze-LastPassVaultGUI PowerShell script
-# Version 0.5
+# Version 0.8
 # Written by Rob Woodruff and ChatGPT
 # More information and updates can be found at https://github.com/FuLoRi/Analyze-LastPassVaultGUI
 
@@ -30,30 +30,73 @@ Add-Type -AssemblyName System.Windows.Forms
 
 # Create the GUI form
 $form = New-Object System.Windows.Forms.Form
-$form.Size = New-Object System.Drawing.Size(620, 220)
+$form.Size = New-Object System.Drawing.Size(620, 260)
 $form.StartPosition = "CenterScreen"
 $form.Text = "Analyze LastPass Vault"
 
 # Create the left pane
 $leftPane = New-Object System.Windows.Forms.GroupBox
-$leftPane.Size = New-Object System.Drawing.Size(280, 160)
+$leftPane.Size = New-Object System.Drawing.Size(280, 200)
 $leftPane.Location = New-Object System.Drawing.Point(10, 10)
-$leftPane.Text = "Select LastPass vault (XML) file"
+$leftPane.Text = "Provide LastPass vault XML"
+
+# Create the radio buttons for the left pane
+$browseXMLRadio = New-Object System.Windows.Forms.RadioButton
+$browseXMLRadio.Size = New-Object System.Drawing.Size(75, 17)
+$browseXMLRadio.Location = New-Object System.Drawing.Point(10, 20)
+$browseXMLRadio.Text = "Browse"
+$browseXMLRadio.Checked = $true
+$browseXMLRadio.Add_CheckedChanged({
+$xmlBrowseField.Enabled = $true
+$browseXMLButton.Enabled = $true
+$xmlPasteField.Enabled = $false
+$pasteXMLButton.Enabled = $false
+})
+
+$pasteXMLRadio = New-Object System.Windows.Forms.RadioButton
+$pasteXMLRadio.Size = New-Object System.Drawing.Size(75, 17)
+$pasteXMLRadio.Location = New-Object System.Drawing.Point(10, 70)
+$pasteXMLRadio.Text = "Paste"
+$pasteXMLRadio.Add_CheckedChanged({
+$xmlBrowseField.Enabled = $false
+$browseXMLButton.Enabled = $false
+$xmlPasteField.Enabled = $true
+$pasteXMLButton.Enabled = $true
+})
 
 # Create the "Browse" button for the left pane
 $browseXMLButton = New-Object System.Windows.Forms.Button
 $browseXMLButton.Size = New-Object System.Drawing.Size(75, 23)
-$browseXMLButton.Location = New-Object System.Drawing.Point(195, 30)
+$browseXMLButton.Location = New-Object System.Drawing.Point(195, 40)
 $browseXMLButton.Text = "Browse"
 
-# Create the text field for the left pane
-$xmlTextField = New-Object System.Windows.Forms.TextBox
-$xmlTextField.Size = New-Object System.Drawing.Size(165, 20)
-$xmlTextField.Location = New-Object System.Drawing.Point(10, 30)
+# Create the "Browse" text field for the left pane
+$xmlBrowseField = New-Object System.Windows.Forms.TextBox
+$xmlBrowseField.Size = New-Object System.Drawing.Size(165, 20)
+$xmlBrowseField.Location = New-Object System.Drawing.Point(10, 40)
+
+# Create the "Paste" button for the left pane
+$pasteXMLButton = New-Object System.Windows.Forms.Button
+$pasteXMLButton.Size = New-Object System.Drawing.Size(75, 23)
+$pasteXMLButton.Location = New-Object System.Drawing.Point(10, 90)
+$pasteXMLButton.Text = "Paste"
+$pasteXMLButton.Enabled = $false
+
+# Create the "Paste" text field for the left pane
+$xmlPasteField = New-Object System.Windows.Forms.TextBox
+$xmlPasteField.Size = New-Object System.Drawing.Size(260, 60)
+$xmlPasteField.Location = New-Object System.Drawing.Point(10, 120)
+$xmlPasteField.Multiline = $true
+$xmlPasteField.ScrollBars = "Vertical"
+$xmlPasteField.Enabled = $false
 
 # Add the controls to the left pane
-$leftPane.Controls.Add($xmlTextField)
+$leftPane.Controls.Add($browseXMLRadio)
+$leftPane.Controls.Add($pasteXMLRadio)
+$leftPane.Controls.Add($xmlBrowseField)
 $leftPane.Controls.Add($browseXMLButton)
+$leftPane.Controls.Add($xmlPasteField)
+$leftPane.Controls.Add($pasteXMLButton)
 
 # Create the right pane
 $rightPane = New-Object System.Windows.Forms.GroupBox
@@ -86,7 +129,7 @@ $fileNameTextField = New-Object System.Windows.Forms.TextBox
 $fileNameTextField.Size = New-Object System.Drawing.Size(165, 20)
 $fileNameTextField.Location = New-Object System.Drawing.Point(95, 90)
 
-# Create the drop-down menu or radio buttons for the right pane
+# Create the drop-down menu for the right pane
 $formatLabel = New-Object System.Windows.Forms.Label
 $formatLabel.Size = New-Object System.Drawing.Size(80, 13)
 $formatLabel.Location = New-Object System.Drawing.Point(10, 120)
@@ -118,15 +161,53 @@ $rightPane.Controls.Add($analyzeButton)
 $form.Controls.Add($leftPane)
 $form.Controls.Add($rightPane)
 
-# Set up the browse buttons to open a file selection dialog
+# Create the author label
+$authorLabel = New-Object System.Windows.Forms.Label
+$authorLabel.Size = New-Object System.Drawing.Size(130, 20)
+$authorLabel.Location = New-Object System.Drawing.Point(310, 180)
+$authorLabel.Text = "Written by Rob Woodruff"
+
+# Add the author label to the form
+$form.Controls.Add($authorLabel)
+
+# Create the "Check for updates" button
+$checkForUpdatesButton = New-Object System.Windows.Forms.Button
+$checkForUpdatesButton.Size = New-Object System.Drawing.Size(130, 23)
+$checkForUpdatesButton.Location = New-Object System.Drawing.Point(460, 180)
+$checkForUpdatesButton.Text = "Check for updates"
+
+# Open the URL in the default web browser when the button is clicked
+$checkForUpdatesButton.Add_Click({
+Start-Process "https://github.com/FuLoRi/Analyze-LastPassVaultGUI/"
+})
+
+# Add the "Check for updates" button to the form
+$form.Controls.Add($checkForUpdatesButton)
+
+# Set up the browse button to open a file selection dialog
 $browseXMLButton.Add_Click({
     $openFileDialog = New-Object System.Windows.Forms.OpenFileDialog
     $openFileDialog.Filter = "XML files (*.xml)|*.xml"
     if ($openFileDialog.ShowDialog() -eq "OK") {
-        $xmlTextField.Text = $openFileDialog.FileName
+		# Insert the selected file's path into the existing text field
+		$xmlBrowseField.Text = $openFileDialog.FileName
+
+		# Clear the contents of the "Paste" text field
+		$xmlPasteField.Text = ""
     }
 })
 
+# Add an event handler for the "Paste" button's "Click" event
+$pasteXMLButton.Add_Click({
+    # Read the contents of the clipboard and insert it into the "Paste" text field
+    $xmlPasteField.Text = [System.Windows.Forms.Clipboard]::GetText()
+
+	# Convert the XML content to an XML object
+	[xml]$xml = $xmlPasteField.Text
+	
+})
+
+# Set up the browse button to open a folder selection dialog
 $browseOutputButton.Add_Click({
     $folderBrowserDialog = New-Object System.Windows.Forms.FolderBrowserDialog
     if ($folderBrowserDialog.ShowDialog() -eq "OK") {
@@ -136,10 +217,52 @@ $browseOutputButton.Add_Click({
 
 # Set up the "Analyze" button to run
 $analyzeButton.Add_Click({
-    # Validate the input
-    if (-not (Test-Path -Path $xmlTextField.Text)) {
-        [System.Windows.Forms.MessageBox]::Show("The specified XML file does not exist.", "Error", "OK", "Error")
-        return
+	# Check if the "Browse" radio button is checked
+	if ($browseXMLRadio.Checked) {
+		# Use the contents of the "Browse" text field as the input file
+		$InFile = $xmlBrowseField.Text
+	}
+	else {
+		# Set $InFile to a dummy value since it won't be used
+		$InFile = "<xml>"
+	}
+
+    # Check which input method is being used
+    if ($pasteXMLRadio.Checked) {
+        # Validate the pasted XML data
+        if (-not $xmlPasteField.Text) {
+            # Display an error message if the pasted data is empty
+            [System.Windows.Forms.MessageBox]::Show("Please enter or paste XML data into the text field.")
+			return
+        }
+        else {
+            # Set the XML data variable to the pasted data
+            [xml]$xml = $xmlPasteField.Text
+
+            # Proceed with the rest of the script here...
+        }
+    }
+    else {
+        # Validate the input file path
+        if (-not $xmlBrowseField.Text) {
+            # Display an error message if the file path is empty
+            [System.Windows.Forms.MessageBox]::Show("Please enter a valid file path.")
+			return
+        }
+        else {
+            # Check if the input file exists
+            if (-not (Test-Path -Path $xmlBrowseField.Text)) {
+                # Display an error message if the file does not exist
+                [System.Windows.Forms.MessageBox]::Show("The specified file does not exist.")
+				return
+            }
+            else {
+                # Set the XML data variable to the contents of the input file
+                [xml]$xml = Get-Content -Path $InFile
+
+                # Proceed with the rest of the script here...
+            }
+        }
     }
     if (-not (Test-Path -Path $fileLocationTextField.Text)) {
         [System.Windows.Forms.MessageBox]::Show("The specified output folder does not exist.", "Error", "OK", "Error")
@@ -151,12 +274,15 @@ $analyzeButton.Add_Click({
     }
 
     # Set the script parameters
-    $InFile = $xmlTextField.Text
     $OutFile = Join-Path -Path $fileLocationTextField.Text -ChildPath $fileNameTextField.Text
     $Format = $formatMenu.SelectedItem
 
-    # Load the XML file into a variable
-    [xml]$xml = Get-Content -Path $InFile
+     # Load the XML into a variable
+	if ($browseXMLRadio.Checked) {
+		[xml]$xml = Get-Content -Path $InFile
+	} else {
+		[xml]$xml = $xmlPasteField.Text
+	}
 
     # Initialize an empty array to store the results
     $results = @()
@@ -218,7 +344,7 @@ $analyzeButton.Add_Click({
     }
 
     # Show a success message
-    [System.Windows.Forms.MessageBox]::Show("Vault analyzed and output file created successfully.", "Success", "OK", "Information")
+    [System.Windows.Forms.MessageBox]::Show("Analysis complete.", "Success", "OK", "Information")
 })
 
 # Display the GUI form
