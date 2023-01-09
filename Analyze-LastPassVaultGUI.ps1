@@ -25,7 +25,7 @@
 # distributors of this software have been advised of the possibility of such damages.
 
 # Set the version number and date
-$scriptVersion = "1.0"
+$scriptVersion = "1.1"
 $scriptDate = "2023-01-08"
 
 # Load the System.Windows.Forms assembly
@@ -56,7 +56,7 @@ $instructionsText = @'
 
 6. Click "Copy" to copy all of that query response data onto the clipboard.
 
-7. Return here and press the "Paste" button to paste the vault XML into the text field.
+7. Return here and press the "Paste" button to paste the vault XML into the text field. This may take a moment.
 
 8. Specify your desired location, name, and format for the output file and click "Analyze".
 
@@ -253,12 +253,11 @@ $browseXMLButton.Add_Click({
 
 # Add an event handler for the "Paste" button's "Click" event
 $pasteXMLButton.Add_Click({
-    # Read the contents of the clipboard and insert it into the "Paste" text field
+	# Read the contents of the clipboard and insert it into the "Paste" text field
     $xmlPasteField.Text = [System.Windows.Forms.Clipboard]::GetText()
 
 	# Convert the XML content to an XML object
 	[xml]$xml = $xmlPasteField.Text
-	
 })
 
 # Set up the browse button to open a folder selection dialog
@@ -392,6 +391,9 @@ $analyzeButton.Add_Click({
 
     # Show a success message
     [System.Windows.Forms.MessageBox]::Show("Analysis complete.", "Success", "OK", "Information")
+	
+	# Open the output file in the default viewer
+	Start-Process $OutFile
 })
 
 # Display the GUI form
