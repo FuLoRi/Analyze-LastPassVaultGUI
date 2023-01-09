@@ -184,13 +184,13 @@ $browseOutputButton.Text = "Browse"
 
 # Create the drop-down menu for the right pane
 $formatLabel = New-Object System.Windows.Forms.Label
-$formatLabel.Size = New-Object System.Drawing.Size(80, 13)
+$formatLabel.Size = New-Object System.Drawing.Size(45, 13)
 $formatLabel.Location = New-Object System.Drawing.Point(10, 70)
 $formatLabel.Text = "Format:"
 
 $formatMenu = New-Object System.Windows.Forms.ComboBox
 $formatMenu.Size = New-Object System.Drawing.Size(60, 21)
-$formatMenu.Location = New-Object System.Drawing.Point(95, 70)
+$formatMenu.Location = New-Object System.Drawing.Point(60, 70)
 $formatMenu.Items.AddRange(@("CSV", "HTML"))
 $formatMenu.SelectedIndex = 0
 
