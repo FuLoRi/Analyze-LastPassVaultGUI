@@ -1,6 +1,5 @@
 # Analyze-LastPassVaultGUI PowerShell script
-# Version 0.9
-# Written by Rob Woodruff and ChatGPT
+# Written by Rob Woodruff with help from ChatGPT and Steve Gibson
 # More information and updates can be found at https://github.com/FuLoRi/Analyze-LastPassVaultGUI
 
 # PURPOSE:
@@ -24,6 +23,10 @@
 # for any damages, including, but not limited to, direct, indirect, special, incidental, or consequential
 # damages arising out of the use of or inability to use this software, even if the creators and/or
 # distributors of this software have been advised of the possibility of such damages.
+
+# Set the version number and date
+$scriptVersion = "1.0"
+$scriptDate = "2023-01-08"
 
 # Load the System.Windows.Forms assembly
 Add-Type -AssemblyName System.Windows.Forms
@@ -85,21 +88,6 @@ fetch("https://lastpass.com/getaccts.php", {method: "POST"})
     # Copy the text to the clipboard
     [System.Windows.Forms.Clipboard]::SetText($jsQuery)
 
-    # Display a green check mark to the right of the "Copy Query" button
-    $checkMarkLabel = New-Object System.Windows.Forms.Label
-    $checkMarkLabel.Size = New-Object System.Drawing.Size(20, 20)
-    $checkMarkLabel.Location = New-Object System.Drawing.Point(335, 220)
-<#     
-    $checkMarkLabel.Text = "✔"
-    $checkMarkLabel.ForeColor = 'Green'
-    $form.Controls.Add($checkMarkLabel)
-    
-    # Wait for 5 seconds
-    Start-Sleep -Seconds 5
-    
-    # Remove the green check mark from the form
-    $form.Controls.Remove($checkMarkLabel)
- #>	
 })
 
 # Add the instructions label to the instructions group
@@ -122,23 +110,24 @@ $browseXMLRadio = New-Object System.Windows.Forms.RadioButton
 $browseXMLRadio.Size = New-Object System.Drawing.Size(75, 17)
 $browseXMLRadio.Location = New-Object System.Drawing.Point(10, 20)
 $browseXMLRadio.Text = "Browse"
-$browseXMLRadio.Checked = $true
+$browseXMLRadio.Checked = $false
 $browseXMLRadio.Add_CheckedChanged({
-$xmlBrowseField.Enabled = $true
-$browseXMLButton.Enabled = $true
-$xmlPasteField.Enabled = $false
-$pasteXMLButton.Enabled = $false
+	$xmlBrowseField.Enabled = $true
+	$browseXMLButton.Enabled = $true
+	$xmlPasteField.Enabled = $false
+	$pasteXMLButton.Enabled = $false
 })
 
 $pasteXMLRadio = New-Object System.Windows.Forms.RadioButton
 $pasteXMLRadio.Size = New-Object System.Drawing.Size(75, 17)
 $pasteXMLRadio.Location = New-Object System.Drawing.Point(10, 70)
 $pasteXMLRadio.Text = "Paste"
+$pasteXMLRadio.Checked = $true
 $pasteXMLRadio.Add_CheckedChanged({
-$xmlBrowseField.Enabled = $false
-$browseXMLButton.Enabled = $false
-$xmlPasteField.Enabled = $true
-$pasteXMLButton.Enabled = $true
+	$xmlBrowseField.Enabled = $false
+	$browseXMLButton.Enabled = $false
+	$xmlPasteField.Enabled = $true
+	$pasteXMLButton.Enabled = $true
 })
 
 # Create the "Browse" button for the left pane
@@ -146,18 +135,20 @@ $browseXMLButton = New-Object System.Windows.Forms.Button
 $browseXMLButton.Size = New-Object System.Drawing.Size(75, 23)
 $browseXMLButton.Location = New-Object System.Drawing.Point(195, 40)
 $browseXMLButton.Text = "Browse"
+$browseXMLButton.Enabled = $false
 
 # Create the "Browse" text field for the left pane
 $xmlBrowseField = New-Object System.Windows.Forms.TextBox
 $xmlBrowseField.Size = New-Object System.Drawing.Size(165, 20)
 $xmlBrowseField.Location = New-Object System.Drawing.Point(10, 40)
+$xmlBrowseField.Enabled = $false
 
 # Create the "Paste" button for the left pane
 $pasteXMLButton = New-Object System.Windows.Forms.Button
 $pasteXMLButton.Size = New-Object System.Drawing.Size(75, 23)
 $pasteXMLButton.Location = New-Object System.Drawing.Point(10, 90)
 $pasteXMLButton.Text = "Paste"
-$pasteXMLButton.Enabled = $false
+$pasteXMLButton.Enabled = $true
 
 # Create the "Paste" text field for the left pane
 $xmlPasteField = New-Object System.Windows.Forms.TextBox
@@ -165,7 +156,7 @@ $xmlPasteField.Size = New-Object System.Drawing.Size(260, 60)
 $xmlPasteField.Location = New-Object System.Drawing.Point(10, 120)
 $xmlPasteField.Multiline = $true
 $xmlPasteField.ScrollBars = "Vertical"
-$xmlPasteField.Enabled = $false
+$xmlPasteField.Enabled = $true
 
 # Add the controls to the left pane
 $leftPane.Controls.Add($browseXMLRadio)
@@ -177,59 +168,41 @@ $leftPane.Controls.Add($pasteXMLButton)
 
 # Create the right pane
 $rightPane = New-Object System.Windows.Forms.GroupBox
-$rightPane.Size = New-Object System.Drawing.Size(280, 160)
+$rightPane.Size = New-Object System.Drawing.Size(280, 110)
 $rightPane.Location = New-Object System.Drawing.Point(310, 310)
 $rightPane.Text = "Specify output file"
 
-# Create the "File location" field and "Browse" button for the right pane
-$fileLocationLabel = New-Object System.Windows.Forms.Label
-$fileLocationLabel.Size = New-Object System.Drawing.Size(80, 13)
-$fileLocationLabel.Location = New-Object System.Drawing.Point(10, 30)
-$fileLocationLabel.Text = "File location:"
-
-$fileLocationTextField = New-Object System.Windows.Forms.TextBox
-$fileLocationTextField.Size = New-Object System.Drawing.Size(165, 20)
-$fileLocationTextField.Location = New-Object System.Drawing.Point(95, 30)
+# Create the "File name" field and "Browse" button for the right pane
+$fileNameTextField = New-Object System.Windows.Forms.TextBox
+$fileNameTextField.Size = New-Object System.Drawing.Size(165, 20)
+$fileNameTextField.Location = New-Object System.Drawing.Point(10, 30)
 
 $browseOutputButton = New-Object System.Windows.Forms.Button
 $browseOutputButton.Size = New-Object System.Drawing.Size(75, 23)
-$browseOutputButton.Location = New-Object System.Drawing.Point(95, 55)
+$browseOutputButton.Location = New-Object System.Drawing.Point(185, 30)
 $browseOutputButton.Text = "Browse"
-
-# Create the "File name" field for the right pane
-$fileNameLabel = New-Object System.Windows.Forms.Label
-$fileNameLabel.Size = New-Object System.Drawing.Size(80, 13)
-$fileNameLabel.Location = New-Object System.Drawing.Point(10, 90)
-$fileNameLabel.Text = "File name:"
-
-$fileNameTextField = New-Object System.Windows.Forms.TextBox
-$fileNameTextField.Size = New-Object System.Drawing.Size(165, 20)
-$fileNameTextField.Location = New-Object System.Drawing.Point(95, 90)
 
 # Create the drop-down menu for the right pane
 $formatLabel = New-Object System.Windows.Forms.Label
 $formatLabel.Size = New-Object System.Drawing.Size(80, 13)
-$formatLabel.Location = New-Object System.Drawing.Point(10, 120)
+$formatLabel.Location = New-Object System.Drawing.Point(10, 70)
 $formatLabel.Text = "Format:"
 
 $formatMenu = New-Object System.Windows.Forms.ComboBox
 $formatMenu.Size = New-Object System.Drawing.Size(60, 21)
-$formatMenu.Location = New-Object System.Drawing.Point(95, 120)
-$formatMenu.Items.AddRange(@("HTML", "CSV"))
+$formatMenu.Location = New-Object System.Drawing.Point(95, 70)
+$formatMenu.Items.AddRange(@("CSV", "HTML"))
 $formatMenu.SelectedIndex = 0
 
 # Create the "Analyze" button for the right pane
 $analyzeButton = New-Object System.Windows.Forms.Button
 $analyzeButton.Size = New-Object System.Drawing.Size(75, 23)
-$analyzeButton.Location = New-Object System.Drawing.Point(185, 120)
+$analyzeButton.Location = New-Object System.Drawing.Point(185, 70)
 $analyzeButton.Text = "Analyze"
 
 # Add the controls to the right pane
-$rightPane.Controls.Add($fileLocationLabel)
-$rightPane.Controls.Add($fileLocationTextField)
-$rightPane.Controls.Add($browseOutputButton)
-$rightPane.Controls.Add($fileNameLabel)
 $rightPane.Controls.Add($fileNameTextField)
+$rightPane.Controls.Add($browseOutputButton)
 $rightPane.Controls.Add($formatLabel)
 $rightPane.Controls.Add($formatMenu)
 $rightPane.Controls.Add($analyzeButton)
@@ -240,9 +213,13 @@ $form.Controls.Add($rightPane)
 
 # Create the author label
 $authorLabel = New-Object System.Windows.Forms.Label
-$authorLabel.Size = New-Object System.Drawing.Size(130, 20)
-$authorLabel.Location = New-Object System.Drawing.Point(310, 480)
-$authorLabel.Text = "Written by Rob Woodruff"
+$authorLabel.Size = New-Object System.Drawing.Size(130, 60)
+$authorLabel.Location = New-Object System.Drawing.Point(310, 440)
+$authorLabel.Text = @"
+Written by Rob Woodruff
+Version: $scriptVersion
+Date: $scriptDate
+"@
 
 # Add the author label to the form
 $form.Controls.Add($authorLabel)
@@ -250,12 +227,12 @@ $form.Controls.Add($authorLabel)
 # Create the "Check for updates" button
 $checkForUpdatesButton = New-Object System.Windows.Forms.Button
 $checkForUpdatesButton.Size = New-Object System.Drawing.Size(130, 23)
-$checkForUpdatesButton.Location = New-Object System.Drawing.Point(460, 480)
+$checkForUpdatesButton.Location = New-Object System.Drawing.Point(460, 440)
 $checkForUpdatesButton.Text = "Check for updates"
 
 # Open the URL in the default web browser when the button is clicked
 $checkForUpdatesButton.Add_Click({
-Start-Process "https://github.com/FuLoRi/Analyze-LastPassVaultGUI/"
+	Start-Process "https://github.com/FuLoRi/Analyze-LastPassVaultGUI/"
 })
 
 # Add the "Check for updates" button to the form
@@ -286,9 +263,10 @@ $pasteXMLButton.Add_Click({
 
 # Set up the browse button to open a folder selection dialog
 $browseOutputButton.Add_Click({
-    $folderBrowserDialog = New-Object System.Windows.Forms.FolderBrowserDialog
-    if ($folderBrowserDialog.ShowDialog() -eq "OK") {
-        $fileLocationTextField.Text = $folderBrowserDialog.SelectedPath
+    $saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
+	$saveFileDialog.Filter = "CSV files (*.csv)|*.csv|HTML files (*.html)|*.html"
+    if ($saveFileDialog.ShowDialog() -eq "OK") {
+        $fileNameTextField.Text = $saveFileDialog.FileName
     }
 })
 
@@ -341,17 +319,9 @@ $analyzeButton.Add_Click({
             }
         }
     }
-    if (-not (Test-Path -Path $fileLocationTextField.Text)) {
-        [System.Windows.Forms.MessageBox]::Show("The specified output folder does not exist.", "Error", "OK", "Error")
-        return
-    }
-    if (-not $fileNameTextField.Text) {
-        [System.Windows.Forms.MessageBox]::Show("Please specify a file name for the output file.", "Error", "OK", "Error")
-        return
-    }
-
-    # Set the script parameters
-    $OutFile = Join-Path -Path $fileLocationTextField.Text -ChildPath $fileNameTextField.Text
+	
+   # Set the script parameters
+    $OutFile = $fileNameTextField.Text
     $Format = $formatMenu.SelectedItem
 
      # Load the XML into a variable
