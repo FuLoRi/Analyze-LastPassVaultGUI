@@ -1,5 +1,5 @@
 # Analyze-LastPassVaultGUI PowerShell script
-# Version 0.8
+# Version 0.9
 # Written by Rob Woodruff and ChatGPT
 # More information and updates can be found at https://github.com/FuLoRi/Analyze-LastPassVaultGUI
 
@@ -30,14 +30,91 @@ Add-Type -AssemblyName System.Windows.Forms
 
 # Create the GUI form
 $form = New-Object System.Windows.Forms.Form
-$form.Size = New-Object System.Drawing.Size(620, 260)
+$form.Size = New-Object System.Drawing.Size(620, 560)
 $form.StartPosition = "CenterScreen"
 $form.Text = "Analyze LastPass Vault"
+
+# Create the "Instructions" group
+$instructionsGroup = New-Object System.Windows.Forms.GroupBox
+$instructionsGroup.Size = New-Object System.Drawing.Size(580, 290)
+$instructionsGroup.Location = New-Object System.Drawing.Point(10, 10)
+$instructionsGroup.Text = "Instructions for use"
+
+$instructionsText = @'
+1. Press the "Copy Query" button below to copy a short 3-line JavaScript query to your clipboard.
+
+2. Open Chrome or Edge. Login to LastPass so that you're looking at your vault.
+
+3. Press F12 to open the developer tools. Select the "Console" tab to move to that view. You'll have a cursor.
+
+4. Paste the JavaScript query into the console and press "Enter". Your page will fill with a large XML dump.
+
+5. Look carefully at the bottom of the page for the "Show More" and "Copy" options.
+
+6. Click "Copy" to copy all of that query response data onto the clipboard.
+
+7. Return here and press the "Paste" button to paste the vault XML into the text field.
+
+8. Specify your desired location, name, and format for the output file and click "Analyze".
+
+9. Open the output file to see the decoded URLs and a brief analysis of each encrypted field.
+Note: "OK" means it's encrypted with CBC, "Blank" means the field is empty, and a warning means it's encrypted with ECB.
+'@
+
+# Create the instructions label
+$instructionsLabel = New-Object System.Windows.Forms.Label
+$instructionsLabel.Location = New-Object System.Drawing.Point(10, 20)
+$instructionsLabel.Size = New-Object System.Drawing.Size(560, 240)
+$instructionsLabel.Text = $instructionsText
+
+# Create the "Copy Query" button
+$copyQueryButton = New-Object System.Windows.Forms.Button
+$copyQueryButton.Size = New-Object System.Drawing.Size(75, 23)
+$copyQueryButton.Location = New-Object System.Drawing.Point(250, 260)
+$copyQueryButton.Text = "Copy Query"
+
+# Add an action when the "Copy Query" button is clicked
+$copyQueryButton.Add_Click({
+	# Create a literal multiline string containing the JavaScript query
+	$jsQuery=@'
+fetch("https://lastpass.com/getaccts.php", {method: "POST"})
+  .then(response => response.text())
+  .then(text => console.log(text.replace(/>/g, ">\n")));
+'@
+	
+    # Copy the text to the clipboard
+    [System.Windows.Forms.Clipboard]::SetText($jsQuery)
+
+    # Display a green check mark to the right of the "Copy Query" button
+    $checkMarkLabel = New-Object System.Windows.Forms.Label
+    $checkMarkLabel.Size = New-Object System.Drawing.Size(20, 20)
+    $checkMarkLabel.Location = New-Object System.Drawing.Point(335, 220)
+<#     
+    $checkMarkLabel.Text = "✔"
+    $checkMarkLabel.ForeColor = 'Green'
+    $form.Controls.Add($checkMarkLabel)
+    
+    # Wait for 5 seconds
+    Start-Sleep -Seconds 5
+    
+    # Remove the green check mark from the form
+    $form.Controls.Remove($checkMarkLabel)
+ #>	
+})
+
+# Add the instructions label to the instructions group
+$instructionsGroup.Controls.Add($instructionsLabel)
+
+# Add the "Copy Query" button to the "Instructions" group
+$instructionsGroup.Controls.Add($copyQueryButton)
+
+# Add the instructions group to the form
+$form.Controls.Add($instructionsGroup)
 
 # Create the left pane
 $leftPane = New-Object System.Windows.Forms.GroupBox
 $leftPane.Size = New-Object System.Drawing.Size(280, 200)
-$leftPane.Location = New-Object System.Drawing.Point(10, 10)
+$leftPane.Location = New-Object System.Drawing.Point(10, 310)
 $leftPane.Text = "Provide LastPass vault XML"
 
 # Create the radio buttons for the left pane
@@ -101,7 +178,7 @@ $leftPane.Controls.Add($pasteXMLButton)
 # Create the right pane
 $rightPane = New-Object System.Windows.Forms.GroupBox
 $rightPane.Size = New-Object System.Drawing.Size(280, 160)
-$rightPane.Location = New-Object System.Drawing.Point(310, 10)
+$rightPane.Location = New-Object System.Drawing.Point(310, 310)
 $rightPane.Text = "Specify output file"
 
 # Create the "File location" field and "Browse" button for the right pane
@@ -164,7 +241,7 @@ $form.Controls.Add($rightPane)
 # Create the author label
 $authorLabel = New-Object System.Windows.Forms.Label
 $authorLabel.Size = New-Object System.Drawing.Size(130, 20)
-$authorLabel.Location = New-Object System.Drawing.Point(310, 180)
+$authorLabel.Location = New-Object System.Drawing.Point(310, 480)
 $authorLabel.Text = "Written by Rob Woodruff"
 
 # Add the author label to the form
@@ -173,7 +250,7 @@ $form.Controls.Add($authorLabel)
 # Create the "Check for updates" button
 $checkForUpdatesButton = New-Object System.Windows.Forms.Button
 $checkForUpdatesButton.Size = New-Object System.Drawing.Size(130, 23)
-$checkForUpdatesButton.Location = New-Object System.Drawing.Point(460, 180)
+$checkForUpdatesButton.Location = New-Object System.Drawing.Point(460, 480)
 $checkForUpdatesButton.Text = "Check for updates"
 
 # Open the URL in the default web browser when the button is clicked
