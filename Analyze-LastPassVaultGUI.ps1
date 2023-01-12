@@ -25,8 +25,8 @@
 # distributors of this software have been advised of the possibility of such damages.
 
 # Set the version number and date
-$scriptVersion = "1.1"
-$scriptDate = "2023-01-08"
+$scriptVersion = "1.2"
+$scriptDate = "2023-01-11"
 
 # Load the System.Windows.Forms assembly
 Add-Type -AssemblyName System.Windows.Forms
@@ -325,9 +325,9 @@ $analyzeButton.Add_Click({
 
      # Load the XML into a variable
 	if ($browseXMLRadio.Checked) {
-		[xml]$xml = Get-Content -Path $InFile
+		[xml]$xml = (Get-Content -Path $InFile) -replace ('custom_js=\".+\" u=', 'custom_js="" u=')
 	} else {
-		[xml]$xml = $xmlPasteField.Text
+		[xml]$xml = $xmlPasteField.Text -replace ('custom_js=\".+\" u=', 'custom_js="" u=')
 	}
 
     # Initialize an empty array to store the results
