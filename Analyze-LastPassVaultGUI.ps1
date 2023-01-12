@@ -213,6 +213,7 @@ $formatMenu = New-Object System.Windows.Forms.ComboBox
 $formatMenu.Size = New-Object System.Drawing.Size(60, 21)
 $formatMenu.Location = New-Object System.Drawing.Point(60, 70)
 $formatMenu.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Left -bor [AnchorStyles]::Right
+$formatMenu.DropDownStyle = [ComboBoxStyle]::DropDownList
 $formatMenu.Items.AddRange(@("CSV", "HTML"))
 $formatMenu.SelectedIndex = 0
 
