@@ -291,7 +291,7 @@ $analyzeButton.Add_Click({
         }
         else {
             # Set the XML data variable to the pasted data
-            [xml]$xml = $xmlPasteField.Text
+			[xml]$xml = $xmlPasteField.Text -replace ('custom_js=\".+\" ', 'custom_js="" ')
 
             # Proceed with the rest of the script here...
         }
@@ -312,7 +312,7 @@ $analyzeButton.Add_Click({
             }
             else {
                 # Set the XML data variable to the contents of the input file
-                [xml]$xml = Get-Content -Path $InFile
+                [xml]$xml = (Get-Content -Path $InFile) -replace ('custom_js=\".+\" ', 'custom_js="" ')
 
                 # Proceed with the rest of the script here...
             }
