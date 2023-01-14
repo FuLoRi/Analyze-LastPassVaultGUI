@@ -423,4 +423,4 @@ $analyzeButton.Add_Click({
 })
 
 # Display the GUI form
-$form.ShowDialog()
+$form.ShowDialog() | Out-Null
