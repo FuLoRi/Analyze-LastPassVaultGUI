@@ -27,8 +27,8 @@
 using namespace System.Windows.Forms;
 
 # Set the version number and date
-$scriptVersion = "1.1"
-$scriptDate = "2023-01-08"
+$scriptVersion = "1.2"
+$scriptDate = "2023-01-17"
 
 # Load the System.Windows.Forms assembly
 Add-Type -AssemblyName System.Windows.Forms
