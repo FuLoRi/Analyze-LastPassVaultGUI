@@ -24,9 +24,11 @@
 # damages arising out of the use of or inability to use this software, even if the creators and/or
 # distributors of this software have been advised of the possibility of such damages.
 
+using namespace System.Windows.Forms;
+
 # Set the version number and date
-$scriptVersion = "1.1"
-$scriptDate = "2023-01-08"
+$scriptVersion = "1.2"
+$scriptDate = "2023-01-17"
 
 # Load the System.Windows.Forms assembly
 Add-Type -AssemblyName System.Windows.Forms
@@ -41,6 +43,7 @@ $form.Text = "Analyze LastPass Vault"
 $instructionsGroup = New-Object System.Windows.Forms.GroupBox
 $instructionsGroup.Size = New-Object System.Drawing.Size(580, 290)
 $instructionsGroup.Location = New-Object System.Drawing.Point(10, 10)
+$instructionsGroup.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Left -bor [AnchorStyles]::Bottom -bor [AnchorStyles]::Right
 $instructionsGroup.Text = "Instructions for use"
 
 $instructionsText = @'
@@ -68,12 +71,14 @@ Note: "OK" means it's encrypted with CBC, "Blank" means the field is empty, and 
 $instructionsLabel = New-Object System.Windows.Forms.Label
 $instructionsLabel.Location = New-Object System.Drawing.Point(10, 20)
 $instructionsLabel.Size = New-Object System.Drawing.Size(560, 240)
+$instructionsLabel.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Left -bor [AnchorStyles]::Bottom -bor [AnchorStyles]::Right
 $instructionsLabel.Text = $instructionsText
 
 # Create the "Copy Query" button
 $copyQueryButton = New-Object System.Windows.Forms.Button
 $copyQueryButton.Size = New-Object System.Drawing.Size(75, 23)
 $copyQueryButton.Location = New-Object System.Drawing.Point(250, 260)
+$copyQueryButton.Anchor = [AnchorStyles]::Bottom
 $copyQueryButton.Text = "Copy Query"
 
 # Add an action when the "Copy Query" button is clicked
@@ -99,10 +104,20 @@ $instructionsGroup.Controls.Add($copyQueryButton)
 # Add the instructions group to the form
 $form.Controls.Add($instructionsGroup)
 
+# Create split container for left & right sections
+$splitContainer = New-Object System.Windows.Forms.SplitContainer
+$splitContainer.Size = New-Object System.Drawing.Size(580, 200)
+$splitContainer.Location = New-Object System.Drawing.Point(10, 310)
+$splitContainer.Anchor = [AnchorStyles]::Bottom -bor [AnchorStyles]::Left -bor [AnchorStyles]::Right
+$splitContainer.IsSplitterFixed = $true
+$splitContainer.SplitterDistance = 290
+$splitContainer.Orientation = [Orientation]::Vertical
+
 # Create the left pane
 $leftPane = New-Object System.Windows.Forms.GroupBox
 $leftPane.Size = New-Object System.Drawing.Size(280, 200)
 $leftPane.Location = New-Object System.Drawing.Point(10, 310)
+$leftPane.Dock = [DockStyle]::Fill
 $leftPane.Text = "Provide LastPass vault XML"
 
 # Create the radio buttons for the left pane
@@ -134,6 +149,7 @@ $pasteXMLRadio.Add_CheckedChanged({
 $browseXMLButton = New-Object System.Windows.Forms.Button
 $browseXMLButton.Size = New-Object System.Drawing.Size(75, 23)
 $browseXMLButton.Location = New-Object System.Drawing.Point(195, 40)
+$browseXMLButton.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Right
 $browseXMLButton.Text = "Browse"
 $browseXMLButton.Enabled = $false
 
@@ -141,6 +157,7 @@ $browseXMLButton.Enabled = $false
 $xmlBrowseField = New-Object System.Windows.Forms.TextBox
 $xmlBrowseField.Size = New-Object System.Drawing.Size(165, 20)
 $xmlBrowseField.Location = New-Object System.Drawing.Point(10, 40)
+$xmlBrowseField.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Left -bor [AnchorStyles]::Right
 $xmlBrowseField.Enabled = $false
 
 # Create the "Paste" button for the left pane
@@ -154,6 +171,7 @@ $pasteXMLButton.Enabled = $true
 $xmlPasteField = New-Object System.Windows.Forms.TextBox
 $xmlPasteField.Size = New-Object System.Drawing.Size(260, 60)
 $xmlPasteField.Location = New-Object System.Drawing.Point(10, 120)
+$xmlPasteField.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Bottom -bor [AnchorStyles]::Left -bor [AnchorStyles]::Right
 $xmlPasteField.Multiline = $true
 $xmlPasteField.ScrollBars = "Vertical"
 $xmlPasteField.Enabled = $true
@@ -168,18 +186,21 @@ $leftPane.Controls.Add($pasteXMLButton)
 
 # Create the right pane
 $rightPane = New-Object System.Windows.Forms.GroupBox
-$rightPane.Size = New-Object System.Drawing.Size(280, 110)
-$rightPane.Location = New-Object System.Drawing.Point(310, 310)
+$rightPane.Size = New-Object System.Drawing.Size(285, 110)
+$rightPane.Location = New-Object System.Drawing.Point(0, 0)
+$rightPane.Anchor = [AnchorStyles]::Bottom -bor [AnchorStyles]::Left -bor [AnchorStyles]::Right
 $rightPane.Text = "Specify output file"
 
 # Create the "File name" field and "Browse" button for the right pane
 $fileNameTextField = New-Object System.Windows.Forms.TextBox
 $fileNameTextField.Size = New-Object System.Drawing.Size(165, 20)
 $fileNameTextField.Location = New-Object System.Drawing.Point(10, 30)
+$fileNameTextField.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Left -bor [AnchorStyles]::Right
 
 $browseOutputButton = New-Object System.Windows.Forms.Button
 $browseOutputButton.Size = New-Object System.Drawing.Size(75, 23)
 $browseOutputButton.Location = New-Object System.Drawing.Point(185, 30)
+$browseOutputButton.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Right
 $browseOutputButton.Text = "Browse"
 
 # Create the drop-down menu for the right pane
@@ -191,6 +212,8 @@ $formatLabel.Text = "Format:"
 $formatMenu = New-Object System.Windows.Forms.ComboBox
 $formatMenu.Size = New-Object System.Drawing.Size(60, 21)
 $formatMenu.Location = New-Object System.Drawing.Point(60, 70)
+$formatMenu.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Left -bor [AnchorStyles]::Right
+$formatMenu.DropDownStyle = [ComboBoxStyle]::DropDownList
 $formatMenu.Items.AddRange(@("CSV", "HTML"))
 $formatMenu.SelectedIndex = 0
 
@@ -198,6 +221,7 @@ $formatMenu.SelectedIndex = 0
 $analyzeButton = New-Object System.Windows.Forms.Button
 $analyzeButton.Size = New-Object System.Drawing.Size(75, 23)
 $analyzeButton.Location = New-Object System.Drawing.Point(185, 70)
+$analyzeButton.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Right
 $analyzeButton.Text = "Analyze"
 
 # Add the controls to the right pane
@@ -207,27 +231,22 @@ $rightPane.Controls.Add($formatLabel)
 $rightPane.Controls.Add($formatMenu)
 $rightPane.Controls.Add($analyzeButton)
 
-# Add the panes to the form
-$form.Controls.Add($leftPane)
-$form.Controls.Add($rightPane)
-
 # Create the author label
 $authorLabel = New-Object System.Windows.Forms.Label
-$authorLabel.Size = New-Object System.Drawing.Size(130, 60)
-$authorLabel.Location = New-Object System.Drawing.Point(310, 440)
+$authorLabel.Size = New-Object System.Drawing.Size(150, 60)
+$authorLabel.Location = New-Object System.Drawing.Point(0, 120)
+$authorLabel.Anchor = [AnchorStyles]::Top -bor [AnchorStyles]::Left -bor [AnchorStyles]::Right
 $authorLabel.Text = @"
 Written by Rob Woodruff
 Version: $scriptVersion
 Date: $scriptDate
 "@
 
-# Add the author label to the form
-$form.Controls.Add($authorLabel)
-
 # Create the "Check for updates" button
 $checkForUpdatesButton = New-Object System.Windows.Forms.Button
 $checkForUpdatesButton.Size = New-Object System.Drawing.Size(130, 23)
-$checkForUpdatesButton.Location = New-Object System.Drawing.Point(460, 440)
+$checkForUpdatesButton.Location = New-Object System.Drawing.Point(155, 120)
+$checkForUpdatesButton.Anchor = [AnchorStyles]::Bottom -bor [AnchorStyles]::Right
 $checkForUpdatesButton.Text = "Check for updates"
 
 # Open the URL in the default web browser when the button is clicked
@@ -235,8 +254,15 @@ $checkForUpdatesButton.Add_Click({
 	Start-Process "https://github.com/FuLoRi/Analyze-LastPassVaultGUI/"
 })
 
-# Add the "Check for updates" button to the form
-$form.Controls.Add($checkForUpdatesButton)
+# Add the left and right panes to the left-right split container
+$splitContainer.Panel1.Controls.Add($leftPane)
+$splitContainer.Panel2.Controls.Add($rightPane)
+$splitContainer.Panel2.Controls.Add($authorLabel)
+$splitContainer.Panel2.Controls.Add($checkForUpdatesButton)
+
+# Add the left-right split container to the form
+$form.Controls.Add($splitContainer)
+
 
 # Set up the browse button to open a file selection dialog
 $browseXMLButton.Add_Click({
@@ -397,4 +423,4 @@ $analyzeButton.Add_Click({
 })
 
 # Display the GUI form
-$form.ShowDialog()
+$form.ShowDialog() | Out-Null
