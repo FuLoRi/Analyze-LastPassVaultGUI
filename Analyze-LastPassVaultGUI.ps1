@@ -33,6 +33,11 @@ $scriptDate = "2023-01-17"
 # Load the System.Windows.Forms assembly
 Add-Type -AssemblyName System.Windows.Forms
 
+#FUnction to convert Unix date time
+Function Convert-FromUnixDate ($UnixDate) {
+    [timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($UnixDate))
+}
+
 # Create the GUI form
 $form = New-Object System.Windows.Forms.Form
 $form.Size = New-Object System.Drawing.Size(620, 560)
@@ -370,8 +375,8 @@ $analyzeButton.Add_Click({
             Extra = $account.extra
             IsBookmark = $account.isbookmark
             NeverAutofill = $account.never_autofill
-            LastTouch = $account.last_touch
-            LastModified = $account.last_modified
+            LastTouch = "$((Convert-FromUnixDate $account.last_touch).GetDateTimeFormats('o'))"
+	    LastModified = "$((Convert-FromUnixDate $account.last_modified).GetDateTimeFormats('o'))"
             LaunchCount = $account.launch_count
             UserName = $account.login.u
             Password = $account.login.p
