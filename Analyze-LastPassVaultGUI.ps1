@@ -376,7 +376,7 @@ $analyzeButton.Add_Click({
             IsBookmark = $account.isbookmark
             NeverAutofill = $account.never_autofill
             LastTouch = "$((Convert-FromUnixDate $account.last_touch).GetDateTimeFormats('s'))"
-			LastModified = "$((Convert-FromUnixDate $account.last_modified).GetDateTimeFormats('s'))"
+            LastModified = "$((Convert-FromUnixDate $account.last_modified).GetDateTimeFormats('s'))"
             LaunchCount = $account.launch_count
             UserName = $account.login.u
             Password = $account.login.p
