@@ -27,13 +27,13 @@
 using namespace System.Windows.Forms;
 
 # Set the version number and date
-$scriptVersion = "1.2"
-$scriptDate = "2023-01-17"
+$scriptVersion = "1.3"
+$scriptDate = "2023-04-28"
 
 # Load the System.Windows.Forms assembly
 Add-Type -AssemblyName System.Windows.Forms
 
-#FUnction to convert Unix date time
+# Function to convert Unix epoch to date and time in the local time zone
 Function Convert-FromUnixDate ($UnixDate) {
     [timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($UnixDate))
 }
@@ -375,8 +375,8 @@ $analyzeButton.Add_Click({
             Extra = $account.extra
             IsBookmark = $account.isbookmark
             NeverAutofill = $account.never_autofill
-            LastTouch = "$((Convert-FromUnixDate $account.last_touch).GetDateTimeFormats('o'))"
-	    LastModified = "$((Convert-FromUnixDate $account.last_modified).GetDateTimeFormats('o'))"
+            LastTouch = "$((Convert-FromUnixDate $account.last_touch).GetDateTimeFormats('s'))"
+			LastModified = "$((Convert-FromUnixDate $account.last_modified).GetDateTimeFormats('s'))"
             LaunchCount = $account.launch_count
             UserName = $account.login.u
             Password = $account.login.p
