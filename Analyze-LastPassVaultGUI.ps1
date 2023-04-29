@@ -27,7 +27,7 @@
 using namespace System.Windows.Forms;
 
 # Set the version number and date
-$scriptVersion = "1.3"
+$scriptVersion = "1.4"
 $scriptDate = "2023-04-28"
 
 # Load the System.Windows.Forms assembly
@@ -35,7 +35,7 @@ Add-Type -AssemblyName System.Windows.Forms
 
 # Function to convert Unix epoch to date and time in the local time zone
 Function Convert-FromUnixDate ($UnixDate) {
-    [timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($UnixDate))
+	[timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($UnixDate))
 }
 
 # Create the GUI form
@@ -95,9 +95,8 @@ fetch("https://lastpass.com/getaccts.php", {method: "POST"})
   .then(text => console.log(text.replace(/>/g, ">\n")));
 '@
 	
-    # Copy the text to the clipboard
-    [System.Windows.Forms.Clipboard]::SetText($jsQuery)
-
+	# Copy the text to the clipboard
+	[System.Windows.Forms.Clipboard]::SetText($jsQuery)
 })
 
 # Add the instructions label to the instructions group
@@ -271,21 +270,21 @@ $form.Controls.Add($splitContainer)
 
 # Set up the browse button to open a file selection dialog
 $browseXMLButton.Add_Click({
-    $openFileDialog = New-Object System.Windows.Forms.OpenFileDialog
-    $openFileDialog.Filter = "XML files (*.xml)|*.xml"
-    if ($openFileDialog.ShowDialog() -eq "OK") {
+	$openFileDialog = New-Object System.Windows.Forms.OpenFileDialog
+	$openFileDialog.Filter = "XML files (*.xml)|*.xml"
+	if ($openFileDialog.ShowDialog() -eq "OK") {
 		# Insert the selected file's path into the existing text field
 		$xmlBrowseField.Text = $openFileDialog.FileName
 
 		# Clear the contents of the "Paste" text field
 		$xmlPasteField.Text = ""
-    }
+	}
 })
 
 # Add an event handler for the "Paste" button's "Click" event
 $pasteXMLButton.Add_Click({
 	# Read the contents of the clipboard and insert it into the "Paste" text field
-    $xmlPasteField.Text = [System.Windows.Forms.Clipboard]::GetText()
+	$xmlPasteField.Text = [System.Windows.Forms.Clipboard]::GetText()
 
 	# Convert the XML content to an XML object
 	[xml]$xml = $xmlPasteField.Text
@@ -293,11 +292,11 @@ $pasteXMLButton.Add_Click({
 
 # Set up the browse button to open a folder selection dialog
 $browseOutputButton.Add_Click({
-    $saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
+	$saveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
 	$saveFileDialog.Filter = "CSV files (*.csv)|*.csv|HTML files (*.html)|*.html"
-    if ($saveFileDialog.ShowDialog() -eq "OK") {
-        $fileNameTextField.Text = $saveFileDialog.FileName
-    }
+	if ($saveFileDialog.ShowDialog() -eq "OK") {
+		$fileNameTextField.Text = $saveFileDialog.FileName
+	}
 })
 
 # Set up the "Analyze" button to run
@@ -312,116 +311,116 @@ $analyzeButton.Add_Click({
 		$InFile = "<xml>"
 	}
 
-    # Check which input method is being used
-    if ($pasteXMLRadio.Checked) {
-        # Validate the pasted XML data
-        if (-not $xmlPasteField.Text) {
-            # Display an error message if the pasted data is empty
-            [System.Windows.Forms.MessageBox]::Show("Please enter or paste XML data into the text field.")
+	# Check which input method is being used
+	if ($pasteXMLRadio.Checked) {
+		# Validate the pasted XML data
+		if (-not $xmlPasteField.Text) {
+			# Display an error message if the pasted data is empty
+			[System.Windows.Forms.MessageBox]::Show("Please enter or paste XML data into the text field.")
 			return
-        }
-        else {
-            # Set the XML data variable to the pasted data
-            [xml]$xml = $xmlPasteField.Text
+		}
+		else {
+			# Set the XML data variable to the pasted data
+			[xml]$xml = $xmlPasteField.Text
 
-            # Proceed with the rest of the script here...
-        }
-    }
-    else {
-        # Validate the input file path
-        if (-not $xmlBrowseField.Text) {
-            # Display an error message if the file path is empty
-            [System.Windows.Forms.MessageBox]::Show("Please enter a valid file path.")
+			# Proceed with the rest of the script here...
+		}
+	}
+	else {
+		# Validate the input file path
+		if (-not $xmlBrowseField.Text) {
+			# Display an error message if the file path is empty
+			[System.Windows.Forms.MessageBox]::Show("Please enter a valid file path.")
 			return
-        }
-        else {
-            # Check if the input file exists
-            if (-not (Test-Path -Path $xmlBrowseField.Text)) {
-                # Display an error message if the file does not exist
-                [System.Windows.Forms.MessageBox]::Show("The specified file does not exist.")
+		}
+		else {
+			# Check if the input file exists
+			if (-not (Test-Path -Path $xmlBrowseField.Text)) {
+				# Display an error message if the file does not exist
+				[System.Windows.Forms.MessageBox]::Show("The specified file does not exist.")
 				return
-            }
-            else {
-                # Set the XML data variable to the contents of the input file
-                [xml]$xml = Get-Content -Path $InFile
+			}
+			else {
+				# Set the XML data variable to the contents of the input file
+				[xml]$xml = Get-Content -Path $InFile
 
-                # Proceed with the rest of the script here...
-            }
-        }
-    }
+				# Proceed with the rest of the script here...
+			}
+		}
+	}
 	
    # Set the script parameters
-    $OutFile = $fileNameTextField.Text
-    $Format = $formatMenu.SelectedItem
+	$OutFile = $fileNameTextField.Text
+	$Format = $formatMenu.SelectedItem
 
-     # Load the XML into a variable
+	 # Load the XML into a variable
 	if ($browseXMLRadio.Checked) {
 		[xml]$xml = Get-Content -Path $InFile
 	} else {
 		[xml]$xml = $xmlPasteField.Text
 	}
 
-    # Initialize an empty array to store the results
-    $results = @()
+	# Initialize an empty array to store the results
+	$results = @()
 
-    # Iterate over the account elements in the XML file
-    foreach ($account in $xml.response.accounts.account) {
-        # Initialize a new object to store the data for this account
-        $result = [pscustomobject]@{
-            Name = $account.name
-            URL = $account.url
-            ID = $account.id
-            Group = $account.group
-            Extra = $account.extra
-            IsBookmark = $account.isbookmark
-            NeverAutofill = $account.never_autofill
-            LastTouch = "$((Convert-FromUnixDate $account.last_touch).GetDateTimeFormats('s'))"
-            LastModified = "$((Convert-FromUnixDate $account.last_modified).GetDateTimeFormats('s'))"
-            LaunchCount = $account.launch_count
-            UserName = $account.login.u
-            Password = $account.login.p
-        }
+	# Iterate over the account elements in the XML file
+	foreach ($account in $xml.response.accounts.account) {
+		# Initialize a new object to store the data for this account
+		$result = [pscustomobject]@{
+			Name = $account.name
+			URL = $account.url
+			ID = $account.id
+			Group = $account.group
+			Extra = $account.extra
+			IsBookmark = $account.isbookmark
+			NeverAutofill = $account.never_autofill
+			LastTouch = "$((Convert-FromUnixDate $account.last_touch).GetDateTimeFormats('s'))"
+			LastModified = "$((Convert-FromUnixDate $account.last_modified).GetDateTimeFormats('s'))"
+			LaunchCount = $account.launch_count
+			UserName = $account.login.u
+			Password = $account.login.p
+		}
 
-        # Convert the hexadecimal values to text/ASCII
-        $hex = $result.URL
-        if (-not [System.Text.RegularExpressions.Regex]::IsMatch($hex, '^[0-9a-fA-F]+$')) {
-            # String is not a hexadecimal string
-            $result.URL = "ERROR: Invalid hexadecimal string."
-        } else {
-            $result.URL = (-join($hex|sls ".."-a|% m*|%{[char]+"0x$_"}))
-        }
+		# Convert the hexadecimal values to text/ASCII
+		$hex = $result.URL
+		if (-not [System.Text.RegularExpressions.Regex]::IsMatch($hex, '^[0-9a-fA-F]+$')) {
+			# String is not a hexadecimal string
+			$result.URL = "ERROR: Invalid hexadecimal string."
+		} else {
+			$result.URL = (-join($hex|sls ".."-a|% m*|%{[char]+"0x$_"}))
+		}
 
-        # Use a regular expression to identify values encrypted with ECB
-        $pattern = '^!'
-        $encryptedValues = @('Name', 'Extra', 'UserName', 'Password', 'Group')
+		# Use a regular expression to identify values encrypted with ECB
+		$pattern = '^!'
+		$encryptedValues = @('Name', 'Extra', 'UserName', 'Password', 'Group')
 
-        foreach ($encryptedValue in $encryptedValues) {
-            if (!$result.$encryptedValue) {
-                # Value is blank
-                $result.$encryptedValue = "Blank"
-            } elseif ($result.$encryptedValue -match $pattern) {
-                # Value is encrypted with CBC
-                $result.$encryptedValue = "OK"
-            } else {
-                # Value is encrypted with ECB
-                $result.$encryptedValue = "WARNING: Encrypted with ECB!"
-            }
-        }
+		foreach ($encryptedValue in $encryptedValues) {
+			if (!$result.$encryptedValue) {
+				# Value is blank
+				$result.$encryptedValue = "Blank"
+			} elseif ($result.$encryptedValue -match $pattern) {
+				# Value is encrypted with CBC
+				$result.$encryptedValue = "OK"
+			} else {
+				# Value is encrypted with ECB
+				$result.$encryptedValue = "WARNING: Encrypted with ECB!"
+			}
+		}
 
-        # Add the result object to the array
-        $results += $result
-    }
+		# Add the result object to the array
+		$results += $result
+	}
 
-    # Save the output file
-    if ($Format -eq "CSV") {
-        $results | Export-Csv -Path $OutFile -NoTypeInformation
-    } else {
-        $html = $results | ConvertTo-Html -Fragment
-        $html | Out-File -FilePath $OutFile
-    }
+	# Save the output file
+	if ($Format -eq "CSV") {
+		$results | Export-Csv -Path $OutFile -NoTypeInformation
+	} else {
+		$html = $results | ConvertTo-Html -Fragment
+		$html | Out-File -FilePath $OutFile
+	}
 
-    # Show a success message
-    [System.Windows.Forms.MessageBox]::Show("Analysis complete.", "Success", "OK", "Information")
+	# Show a success message
+	[System.Windows.Forms.MessageBox]::Show("Analysis complete.", "Success", "OK", "Information")
 	
 	# Open the output file in the default viewer
 	Start-Process $OutFile
